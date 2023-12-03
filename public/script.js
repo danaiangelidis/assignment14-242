@@ -29,7 +29,9 @@ const showAnimals = async() => {
     let animals = await getAnimals();
 
     const dogsDiv = document.getElementById("dogs");
+    dogsDiv.innerHTML = "";
     const catsDiv = document.getElementById("cats");
+    catsDiv.innerHTML = "";
 
     animals.forEach((animal) => {
         const article = document.createElement("article");
@@ -38,10 +40,6 @@ const showAnimals = async() => {
         const h2 = document.createElement("h2");
         h2.innerHTML = animal.name;
         article.append(h2);
-
-        const img = document.createElement("img");
-        img.src = `http://localhost:3000/${animal.img}`;
-        article.append(img);
 
         const description = document.createElement("p");
         description.innerHTML = animal.description;
@@ -58,12 +56,6 @@ const showAnimals = async() => {
         const weight = document.createElement("p");
         weight.innerHTML = `Weight: ${animal.weight}lbs`;
         article.append(weight);
-
-        const qualifications = document.createElement("ul");
-        article.append(qualifications);
-        animal.qualifications.forEach((qualification) => {
-            qualifications.append(getLi(qualification));
-        });
 
         if (animal.animal == "dog") {
             dogsDiv.append(article);
@@ -88,9 +80,39 @@ const getAnimals = async() => {
     }
 };
 
+const addAnimal = async(e) => {
+    e.preventDefault();
+    const form = document.getElementById("add-animal");
+    const formData = new FormData(form);
+    let response;
+    if (form._id.value == -1) {
+        console.log(...formData);
+
+        response = await fetch("/api/animals", {
+            method: "POST",
+            body: formData
+        });
+    }
+
+    if (response.status != 200) {
+        console.log("Error" + response.status);
+    }
+
+    response = await response.json();
+    resetForm();
+    showAnimals();
+};
+
+const resetForm = () => {
+    const form = document.getElementById("add-animal");
+    form.reset();
+    form._id = "-1";
+};
+
 window.onload = () => {
     document.getElementById("dog-tab").onclick = showDogs;
     document.getElementById("cat-tab").onclick = showCats;
     document.getElementById("add-tab").onclick = showAdd;
+    document.getElementById("add-animal").onsubmit = addAnimal;
     showAnimals();
 };
